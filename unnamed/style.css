@@ -1,0 +1,17 @@
+html {
+  width: 100%;
+  height: 100%;
+
+  cursor: crosshair;
+  background-color: lightsteelblue;
+}
+
+#app {
+  width: 100%;
+  height: 100vh;
+}
+
+#P5-canvas-container {
+  width: 100%;
+  height: 100vh;
+}
