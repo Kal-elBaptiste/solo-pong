@@ -13,8 +13,6 @@ if (current_page == "home") {
 
 function showHome() {
   app.innerHTML = `<div id="P5-canvas-container"></div>`;
-  const P5CANVASCONTAINER = document.getElementById("P5-canvas-container");
-  let P5CANVASCONTAINER_RECT = P5CANVASCONTAINER.getBoundingClientRect();
   mountSketch();
 }
 

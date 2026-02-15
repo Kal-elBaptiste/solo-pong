@@ -4,6 +4,12 @@ html {
 
   cursor: crosshair;
   background-color: lightsteelblue;
+  overflow: hidden;
+}
+
+canvas {
+  /* Mobile: Stops swipes on p5 canvas from moving webpage*/
+  touch-action: none;
 }
 
 #app {

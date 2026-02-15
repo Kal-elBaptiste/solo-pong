@@ -1,6 +1,6 @@
 const sketch = (p) => {
   p.setup = function () {
-    p.canvas = p.createCanvas(400, 400);
+    p.canvas = p.createCanvas(350, 600);
     p.canvas.position(
       p.canvas.parent().getBoundingClientRect().width / 2 - p.canvas.width / 2,
       p.canvas.parent().getBoundingClientRect().height / 2 +
@@ -22,5 +22,7 @@ const sketch = (p) => {
       p.canvas.parent().getBoundingClientRect().height / 2 -
         p.canvas.height / 2,
     );
+
+    function showStartScreen() {}
   }
 };
