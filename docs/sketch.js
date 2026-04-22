@@ -9,8 +9,10 @@ const sketch = (p) => {
   let initialize = true;
   let debug = false;
 
+  // Interactable game objects
   let playButton = undefined;
   let paddle = undefined;
+  let ball = undefined;
 
   p.setup = function () {
     p.canvas = p.createCanvas(300, 600);
@@ -23,11 +25,10 @@ const sketch = (p) => {
 
   p.draw = function () {
     p.background(30);
-    p.fill(100);
-    p.circle(p.mouseX, p.mouseY, 50);
 
     window.onresize = updateCanvasPosition();
 
+    // Helps with setting up objects during state changes
     if (previousState != currentState) {
       initialize = true;
     }
@@ -66,6 +67,7 @@ const sketch = (p) => {
   // Pre-game start screen
   function showStartScreen() {
     if (initialize) {
+      // Play Button
       playButton = new PlayButton(
         [0, 200, 0],
         p.canvas.width / 2,
@@ -76,14 +78,26 @@ const sketch = (p) => {
       playButton.draw();
       playButton.checkForMouse();
 
+      // Paddle
       paddle = new Paddle(
-        [120, 120, 120],
+        [255, 255, 255],
         p.canvas.width / 2,
         p.canvas.height / 1.05,
         50,
         20,
       );
-      paddle.draw();
+      paddle.draw(0, p.canvas.width);
+
+      // Ball
+      ball = new Ball(
+        [255, 0, 0],
+        p.canvas.width / 2,
+        paddle.ypos - 25,
+        25,
+        5,
+        -5,
+      );
+      ball.draw();
     } else {
       playButton.draw();
       playButton.checkForMouse();
@@ -94,8 +108,13 @@ const sketch = (p) => {
 
   // Game
   function game() {
+    // Continue to draw paddle + move it
     paddle.draw();
-    paddle.xpos = p.mouseX;
+    paddle.move(0, p.canvas.width);
+
+    // Continue to draw ball + move it
+    ball.draw();
+    ball.move(0, p.canvas.width, 0, p.canvas.height);
   }
 
   class CircleButton {
@@ -177,10 +196,68 @@ const sketch = (p) => {
     }
 
     draw() {
+      // set color
       p.fill(this.RGBList[0], this.RGBList[1], this.RGBList[2]);
 
+      // place paddle
       p.rectMode(p.CENTER);
       p.rect(this.xpos, this.ypos, this.width, this.height);
+    }
+
+    move(xbound1, xbound2) {
+      // move paddle
+      this.xpos = p.mouseX;
+      console.log(this.xpos);
+
+      // keep paddle within bounds
+      if (this.xpos - this.width / 2 < xbound1) {
+        this.xpos = xbound1 + this.width / 2;
+      }
+      if (this.xpos + this.width / 2 > xbound2) {
+        this.xpos = xbound2 - this.width / 2;
+      }
+    }
+  }
+
+  class Ball {
+    constructor(ballRGBList, xpos, ypos, diameter, xvelocity, yvelocity) {
+      this.RGBList = ballRGBList;
+      this.xpos = xpos;
+      this.ypos = ypos;
+      this.diameter = diameter;
+      this.radius = diameter / 2;
+      this.xvelocity = xvelocity;
+      this.yvelocity = yvelocity;
+    }
+
+    draw() {
+      p.fill(this.RGBList[0], this.RGBList[1], this.RGBList[2]);
+      p.circle(this.xpos, this.ypos, this.diameter);
+    }
+
+    move(xbound1, xbound2, ybound1, ybound2) {
+      this.xpos += this.xvelocity;
+      this.ypos += this.yvelocity;
+
+      // Keeps ball within x boundaries
+      if (
+        this.xpos - this.radius < xbound1 ||
+        this.xpos + this.radius > xbound2
+      ) {
+        // undo movement + flip x velocity sign
+        this.xpos -= this.xvelocity;
+        this.xvelocity = -this.xvelocity;
+      }
+
+      // Keeps ball within y boundaries
+      if (
+        this.ypos - this.radius < ybound1 ||
+        this.ypos + this.radius > ybound2
+      ) {
+        // undo movement + flip y velocity sign
+        this.ypos -= this.yvelocity;
+        this.yvelocity = -this.yvelocity;
+      }
     }
   }
 };
