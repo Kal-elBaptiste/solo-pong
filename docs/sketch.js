@@ -14,6 +14,9 @@ const sketch = (p) => {
   let paddle = undefined;
   let ball = undefined;
 
+  // Score variables
+  let score = 0;
+
   p.setup = function () {
     p.canvas = p.createCanvas(300, 600);
     p.canvas.position(
@@ -83,7 +86,7 @@ const sketch = (p) => {
         [255, 255, 255],
         p.canvas.width / 2,
         p.canvas.height / 1.05,
-        50,
+        75,
         20,
       );
       paddle.draw(0, p.canvas.width);
@@ -106,6 +109,13 @@ const sketch = (p) => {
     }
   }
 
+  // Displays Score Counter
+  function displayScore(score, xpos, ypos, textSize) {
+    p.textAlign(p.CENTER);
+    p.textSize(textSize);
+    p.text(score, xpos, ypos);
+  }
+
   // Game
   function game() {
     // Continue to draw paddle + move it
@@ -115,8 +125,24 @@ const sketch = (p) => {
     // Continue to draw ball + move it
     ball.draw();
     ball.move(0, p.canvas.width, 0, p.canvas.height);
+    ball.detectRectTopCollision(paddle);
+    ball.increaseSpeedBasedOnBounces(5, 2);
+
+    // Display score
+    displayScore(
+      ball.specialbounces,
+      p.canvas.width / 2,
+      p.canvas.height / 2,
+      100,
+    );
+
+    // Restart game upon loss
+    if (ball.ypos + ball.radius > paddle.ypos - paddle.height / 2) {
+      currentState = states.HOME;
+    }
   }
 
+  // Classes
   class CircleButton {
     constructor(buttonRBGList, xpos, ypos, diameter) {
       this.buttonRBGList = buttonRBGList;
@@ -228,6 +254,7 @@ const sketch = (p) => {
       this.radius = diameter / 2;
       this.xvelocity = xvelocity;
       this.yvelocity = yvelocity;
+      this.specialbounces = 0;
     }
 
     draw() {
@@ -258,6 +285,43 @@ const sketch = (p) => {
         this.ypos -= this.yvelocity;
         this.yvelocity = -this.yvelocity;
       }
+    }
+
+    // assumes rectMode is set to CENTER
+    detectRectTopCollision(rect) {
+      // deliver rect's corner coordinates
+      let rectleft = rect.xpos - rect.width / 2;
+      let rectright = rect.xpos + rect.width / 2;
+      let recttop = rect.ypos - rect.height / 2;
+
+      // if circle collides with the rect's top
+      if (
+        this.xpos > rectleft &&
+        this.xpos < rectright &&
+        recttop - this.ypos <= this.radius
+      ) {
+        this.ypos -= this.yvelocity;
+        this.yvelocity = -this.yvelocity;
+        this.specialbounces += 1;
+      }
+    }
+
+    increaseSpeedBasedOnBounces(bouncesNeeded, speedInc) {
+      // Checks for multiples of bouncesNeeded and increases speed accordingly
+      if (
+        Number.isInteger(this.specialbounces / bouncesNeeded) &&
+        this.specialbounces / bouncesNeeded > 0
+      ) {
+        this.xvelocity = 5 + (this.specialbounces / bouncesNeeded) * speedInc;
+        this.yvelocity = 5 + (this.specialbounces / bouncesNeeded) * speedInc;
+      }
+
+      //debug
+      console.log(
+        "Special bounces & special bounces needed:",
+        this.specialbounces % bouncesNeeded,
+      );
+      console.log("Ball xvelocity:", this.xvelocity);
     }
   }
 };
